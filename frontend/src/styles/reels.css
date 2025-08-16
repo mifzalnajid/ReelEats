@@ -62,9 +62,10 @@
   position: relative;
   width: 100%;
   padding: var(--space-6);
-  padding-bottom: calc(env(safe-area-inset-bottom, 0) + var(--space-6));
+  padding-bottom: calc(env(safe-area-inset-bottom, 0) + 72px); /* make space for bottom nav */
   display: flex;
   flex-direction: column;
+  padding-right: 4.5rem;
   gap: var(--space-4);
   pointer-events: auto; /* enable button click */
 }
@@ -104,4 +105,40 @@
 @media (min-width: 768px) {
   .reel-content { padding: 36px; }
   .reel-description { font-size: 1.05rem; max-width: 70ch; }
+}
+
+/* Right-side vertical actions (like, bookmark, comments) */
+.reel-actions {
+  position: absolute;
+  right: 10px;
+  bottom: 96px; /* above bottom CTA and nav */
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  pointer-events: auto;
+}
+
+.reel-action {
+  width: 48px;
+  height: 48px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, #000 35%, transparent);
+  backdrop-filter: blur(2px);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,.15);
+  box-shadow: var(--shadow-md);
+}
+
+.reel-action:active { transform: translateY(1px); }
+
+.reel-action__count {
+  color: #fff;
+  text-align: center;
+  font-size: 12px;
+}
+
+.empty-state{
+  position: absolute; inset: 0; display: grid; place-items: center; color: #fff;
 }

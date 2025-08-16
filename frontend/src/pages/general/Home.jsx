@@ -51,6 +51,14 @@ const Home = () => {
         videoRefs.current.set(id, el)
     }
 
+        const toggleBookmark = (item) => {
+                const list = JSON.parse(localStorage.getItem('savedFoodItems') || '[]')
+                const exists = list.some((x) => x._id === item._id)
+                const next = exists ? list.filter((x) => x._id !== item._id) : [ item, ...list ]
+                localStorage.setItem('savedFoodItems', JSON.stringify(next))
+                // Optional toast can be added later
+        }
+
     return (
         <div ref={containerRef} className="reels-page">
             <div className="reels-feed" role="list">
@@ -68,6 +76,23 @@ const Home = () => {
 
                         <div className="reel-overlay">
                             <div className="reel-overlay-gradient" aria-hidden="true" />
+                                                        <div className="reel-actions">
+                                                                <button className="reel-action" aria-label="Like">
+                                                                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                                            <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 22l7.8-8.6 1-1a5.5 5.5 0 0 0 0-7.8z"/>
+                                                                        </svg>
+                                                                </button>
+                                                                <button className="reel-action" onClick={() => toggleBookmark(item)} aria-label="Bookmark">
+                                                                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                                            <path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1z"/>
+                                                                        </svg>
+                                                                </button>
+                                                                <button className="reel-action" aria-label="Comments">
+                                                                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                                            <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/>
+                                                                        </svg>
+                                                                </button>
+                                                        </div>
                             <div className="reel-content">
                                 <p className="reel-description" title={item.description}>{item.description}</p>
                                 <Link className="reel-btn" to={"/food-partner/" + item.foodPartner} aria-label="Visit store">Visit store</Link>
