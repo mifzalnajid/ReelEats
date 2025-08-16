@@ -139,6 +139,14 @@
   font-size: 12px;
 }
 
+.reel-action-group{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  color: #fff;
+}
+
 .empty-state{
   position: absolute; inset: 0; display: grid; place-items: center; color: #fff;
 }

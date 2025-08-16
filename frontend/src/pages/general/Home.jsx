@@ -13,7 +13,7 @@ const Home = () => {
             (entries) => {
                 entries.forEach((entry) => {
                     const video = entry.target
-                    
+
                     if (!(video instanceof HTMLVideoElement)) return
                     if (entry.isIntersecting && entry.intersectionRatio >= 0.6) {
                         // Autoplay visible video
@@ -33,11 +33,14 @@ const Home = () => {
 
         // Cleanup
         return () => observer.disconnect()
-    }, [videos])
+    }, [ videos ])
 
     useEffect(() => {
         axios.get("http://localhost:3000/api/food", { withCredentials: true })
             .then(response => {
+
+                console.log(response.data);
+
                 setVideos(response.data.foodItems)
             })
             .catch(() => { /* noop: optionally handle error */ })
@@ -51,13 +54,29 @@ const Home = () => {
         videoRefs.current.set(id, el)
     }
 
-        const toggleBookmark = (item) => {
-                const list = JSON.parse(localStorage.getItem('savedFoodItems') || '[]')
-                const exists = list.some((x) => x._id === item._id)
-                const next = exists ? list.filter((x) => x._id !== item._id) : [ item, ...list ]
-                localStorage.setItem('savedFoodItems', JSON.stringify(next))
-                // Optional toast can be added later
+    async function likeVideo(item) {
+
+        const response = await axios.post("http://localhost:3000/api/food/like", { foodId: item._id }, {withCredentials: true})
+
+        if(response.data.like){
+            console.log("Video liked");
+            setVideos((prev) => prev.map((v) => v._id === item._id ? { ...v, likeCount: v.likeCount + 1 } : v))
+        }else{
+            console.log("Video unliked");
+            setVideos((prev) => prev.map((v) => v._id === item._id ? { ...v, likeCount: v.likeCount - 1 } : v))
         }
+        
+    }
+
+    async function saveVideo(item) {
+        const response = await axios.post("http://localhost:3000/api/food/save", { foodId: item._id }, { withCredentials: true })
+        
+        if(response.data.save){
+            setVideos((prev) => prev.map((v) => v._id === item._id ? { ...v, savesCount: v.savesCount + 1 } : v))
+        }else{
+            setVideos((prev) => prev.map((v) => v._id === item._id ? { ...v, savesCount: v.savesCount - 1 } : v))
+        }
+    }
 
     return (
         <div ref={containerRef} className="reels-page">
@@ -76,23 +95,34 @@ const Home = () => {
 
                         <div className="reel-overlay">
                             <div className="reel-overlay-gradient" aria-hidden="true" />
-                                                        <div className="reel-actions">
-                                                                <button className="reel-action" aria-label="Like">
-                                                                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                                                            <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 22l7.8-8.6 1-1a5.5 5.5 0 0 0 0-7.8z"/>
-                                                                        </svg>
-                                                                </button>
-                                                                <button className="reel-action" onClick={() => toggleBookmark(item)} aria-label="Bookmark">
-                                                                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                                                            <path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1z"/>
-                                                                        </svg>
-                                                                </button>
-                                                                <button className="reel-action" aria-label="Comments">
-                                                                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                                                            <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/>
-                                                                        </svg>
-                                                                </button>
-                                                        </div>
+                            <div className="reel-actions">
+                                <div className="reel-action-group">
+                                    <button onClick={() => likeVideo(item)} className="reel-action" aria-label="Like">
+                                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                            <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 22l7.8-8.6 1-1a5.5 5.5 0 0 0 0-7.8z" />
+                                        </svg>
+                                    </button>
+                                    <div className="reel-action__count">{item.likeCount ?? item.likes ?? 0}</div>
+                                </div>
+
+                                <div className="reel-action-group">
+                                    <button className="reel-action" onClick={() => saveVideo(item)} aria-label="Bookmark">
+                                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                            <path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1z" />
+                                        </svg>
+                                    </button>
+                                    <div className="reel-action__count">{item.savesCount ?? item.bookmarks ?? item.saves ?? 0}</div>
+                                </div>
+
+                                <div className="reel-action-group">
+                                    <button className="reel-action" aria-label="Comments">
+                                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                            <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z" />
+                                        </svg>
+                                    </button>
+                                    <div className="reel-action__count">{item.commentsCount ?? (Array.isArray(item.comments) ? item.comments.length : 0)}</div>
+                                </div>
+                            </div>
                             <div className="reel-content">
                                 <p className="reel-description" title={item.description}>{item.description}</p>
                                 <Link className="reel-btn" to={"/food-partner/" + item.foodPartner} aria-label="Visit store">Visit store</Link>

@@ -87,6 +87,10 @@ async function saveFood(req, res) {
             food: foodId
         })
 
+        await foodModel.findByIdAndUpdate(foodId, {
+            $inc: { savesCount: -1 }
+        })
+
         return res.status(200).json({
             message: "Food unsaved successfully"
         })
@@ -97,10 +101,31 @@ async function saveFood(req, res) {
         food: foodId
     })
 
+    await foodModel.findByIdAndUpdate(foodId, {
+        $inc: { savesCount: 1 }
+    })
+
     res.status(201).json({
         message: "Food saved successfully",
         save
     })
+
+}
+
+async function getSaveFood(req, res) {
+
+    const user = req.user;
+
+    const savedFoods = await saveModel.find({ user: user._id }).populate('food');
+
+    if (!savedFoods || savedFoods.length === 0) {
+        return res.status(404).json({ message: "No saved foods found" });
+    }
+
+    res.status(200).json({
+        message: "Saved foods retrieved successfully",
+        savedFoods
+    });
 
 }
 
@@ -109,5 +134,6 @@ module.exports = {
     createFood,
     getFoodItems,
     likeFood,
-    saveFood
+    saveFood,
+    getSaveFood
 }
