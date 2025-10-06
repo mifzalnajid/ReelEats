@@ -7,8 +7,8 @@ import { useNavigate } from 'react-router-dom';
 const FoodPartnerRegister = () => {
 
   const navigate = useNavigate();
-  
-  const handleSubmit = (e) => { 
+
+  const handleSubmit = (e) => {
     e.preventDefault();
 
     const businessName = e.target.businessName.value;
@@ -19,7 +19,7 @@ const FoodPartnerRegister = () => {
     const address = e.target.address.value;
 
     axios.post("http://localhost:3000/api/auth/food-partner/register", {
-      name:businessName,
+      name: businessName,
       contactName,
       phone,
       email,
@@ -27,7 +27,6 @@ const FoodPartnerRegister = () => {
       address
     }, { withCredentials: true })
       .then(response => {
-        console.log(response.data);
         navigate("/create-food"); // Redirect to create food page after successful registration
       })
       .catch(error => {
@@ -42,8 +41,8 @@ const FoodPartnerRegister = () => {
           <h1 id="partner-register-title" className="auth-title">Partner sign up</h1>
           <p className="auth-subtitle">Grow your business with our platform.</p>
         </header>
-        <nav className="auth-alt-action" style={{marginTop: '-4px'}}>
-          <strong style={{fontWeight:600}}>Switch:</strong> <Link to="/user/register">User</Link> • <Link to="/food-partner/register">Food partner</Link>
+        <nav className="auth-alt-action" style={{ marginTop: '-4px' }}>
+          <strong style={{ fontWeight: 600 }}>Switch:</strong> <Link to="/user/register">User</Link> • <Link to="/food-partner/register">Food partner</Link>
         </nav>
         <form className="auth-form" onSubmit={handleSubmit} noValidate>
           <div className="field-group">
@@ -60,10 +59,10 @@ const FoodPartnerRegister = () => {
               <input id="phone" name="phone" placeholder="+1 555 123 4567" autoComplete="tel" />
             </div>
           </div>
-            <div className="field-group">
-              <label htmlFor="email">Email</label>
-              <input id="email" name="email" type="email" placeholder="business@example.com" autoComplete="email" />
-            </div>
+          <div className="field-group">
+            <label htmlFor="email">Email</label>
+            <input id="email" name="email" type="email" placeholder="business@example.com" autoComplete="email" />
+          </div>
           <div className="field-group">
             <label htmlFor="password">Password</label>
             <input id="password" name="password" type="password" placeholder="Create password" autoComplete="new-password" />
