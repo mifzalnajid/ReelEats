@@ -5,16 +5,18 @@ import axios from 'axios'
 
 const Profile = () => {
     const { id } = useParams()
-    const [ profile, setProfile ] = useState(null)
-    const [ videos, setVideos ] = useState([])
+    const [profile, setProfile] = useState(null)
+    const [videos, setVideos] = useState([])
+    const backendUrl = import.meta.env.VITE_BACKEND_URL;
+
 
     useEffect(() => {
-        axios.get(`http://localhost:3000/api/food-partner/${id}`, { withCredentials: true })
+        axios.get(backendUrl + `/api/food-partner/${id}`, { withCredentials: true })
             .then(response => {
                 setProfile(response.data.foodPartner)
                 setVideos(response.data.foodPartner.foodItems)
             })
-    }, [ id ])
+    }, [id])
 
 
     return (

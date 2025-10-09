@@ -10,6 +10,8 @@ const CreateFood = () => {
     const [videoURL, setVideoURL] = useState('');
     const [fileError, setFileError] = useState('');
     const fileInputRef = useRef(null);
+    const backendUrl = import.meta.env.VITE_BACKEND_URL;
+
 
     const navigate = useNavigate();
 
@@ -56,7 +58,7 @@ const CreateFood = () => {
         formData.append('description', description);
         formData.append("mama", videoFile);
 
-        const response = await axios.post("http://localhost:3000/api/food", formData, {
+        const response = await axios.post(+backendUrl + "/api/food", formData, {
             withCredentials: true,
         })
 
