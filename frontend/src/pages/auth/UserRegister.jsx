@@ -5,8 +5,8 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
 const UserRegister = () => {
-
     const navigate = useNavigate();
+    const backendUrl = import.meta.env.VITE_BACKEND_URL; // must NOT have trailing /
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -15,23 +15,26 @@ const UserRegister = () => {
         const lastName = e.target.lastName.value;
         const email = e.target.email.value;
         const password = e.target.password.value;
-        const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
+        try {
+            const response = await axios.post(
+                `${backendUrl}/api/auth/user/register`, // single slash
+                {
+                    fullName: `${firstName} ${lastName}`,
+                    email,
+                    password,
+                },
+                {
+                    withCredentials: true, // important for cookies
+                }
+            );
 
-
-        const response = await axios.post(backendUrl + "/api/auth/user/register", {
-            fullName: firstName + " " + lastName,
-            email,
-            password
-        },
-            {
-                withCredentials: true
-            })
-
-        console.log(response.data);
-
-        navigate("/")
-
+            console.log(response.data);
+            navigate("/"); // redirect after successful registration
+        } catch (error) {
+            console.error("Registration failed:", error);
+            alert(error.response?.data?.message || "Something went wrong");
+        }
     };
 
     return (
