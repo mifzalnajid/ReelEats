@@ -19,7 +19,6 @@ router.post('/',
 
 /* GET /api/food/ [protected] */
 router.get("/",
-    authMiddleware.authUserMiddleware,
     foodController.getFoodItems)
 
 
