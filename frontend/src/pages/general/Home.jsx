@@ -1,50 +1,81 @@
-import React, { useEffect, useState } from 'react'
-import axios from 'axios';
-import '../../styles/reels.css'
-import ReelFeed from '../../components/ReelFeed'
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import "../../styles/reels.css";
+import ReelFeed from "../../components/ReelFeed";
+import { useNavigate } from "react-router-dom";
 
 const Home = () => {
-    const [videos, setVideos] = useState([])
+    const [videos, setVideos] = useState([]);
     const backendUrl = import.meta.env.VITE_BACKEND_URL;
+    const navigate = useNavigate();
 
-    // Autoplay behavior is handled inside ReelFeed
+    // ✅ Always include cookies in axios calls
+    axios.defaults.withCredentials = true;
 
+    // ✅ Fetch videos
     useEffect(() => {
-        axios.get(backendUrl + "/api/food", { withCredentials: true })
-            .then(response => {
-
-                console.log(response.data);
-
-                setVideos(response.data.foodItems)
+        axios
+            .get(`${backendUrl}/api/food`, { withCredentials: true })
+            .then((res) => {
+                setVideos(res.data.foodItems || res.data.foods || []);
             })
-            .catch(() => { /* noop: optionally handle error */ })
-    }, [])
+            .catch((err) => {
+                console.error("Error fetching videos:", err);
+            });
+    }, []);
 
-    // Using local refs within ReelFeed; keeping map here for dependency parity if needed
-
-    async function likeVideo(item) {
-
-        const response = await axios.post(backendUrl + "/api/food/like", { foodId: item._id }, { withCredentials: true })
-
-        if (response.data.like) {
-            console.log("Video liked");
-            setVideos((prev) => prev.map((v) => v._id === item._id ? { ...v, likeCount: v.likeCount + 1 } : v))
+    // ✅ Handle unauthorized cases
+    const handleUnauthorized = (error) => {
+        if (error.response && error.response.status === 401) {
+            navigate("/user/login");
         } else {
-            console.log("Video unliked");
-            setVideos((prev) => prev.map((v) => v._id === item._id ? { ...v, likeCount: v.likeCount - 1 } : v))
+            console.error("Request failed:", error);
         }
+    };
 
-    }
+    // ❤️ Like food
+    const likeVideo = async (item) => {
+        try {
+            const res = await axios.post(
+                `${backendUrl}/api/food/like`,
+                { foodId: item._id },
+                { withCredentials: true }
+            );
 
-    async function saveVideo(item) {
-        const response = await axios.post(backendUrl + "/api/food/save", { foodId: item._id }, { withCredentials: true })
-
-        if (response.data.save) {
-            setVideos((prev) => prev.map((v) => v._id === item._id ? { ...v, savesCount: v.savesCount + 1 } : v))
-        } else {
-            setVideos((prev) => prev.map((v) => v._id === item._id ? { ...v, savesCount: v.savesCount - 1 } : v))
+            const isLiked = res.data.like;
+            setVideos((prev) =>
+                prev.map((v) =>
+                    v._id === item._id
+                        ? { ...v, likeCount: v.likeCount + (isLiked ? 1 : -1) }
+                        : v
+                )
+            );
+        } catch (error) {
+            handleUnauthorized(error);
         }
-    }
+    };
+
+    // 🔖 Save food
+    const saveVideo = async (item) => {
+        try {
+            const res = await axios.post(
+                `${backendUrl}/api/food/save`,
+                { foodId: item._id },
+                { withCredentials: true }
+            );
+
+            const isSaved = res.data.save;
+            setVideos((prev) =>
+                prev.map((v) =>
+                    v._id === item._id
+                        ? { ...v, savesCount: v.savesCount + (isSaved ? 1 : -1) }
+                        : v
+                )
+            );
+        } catch (error) {
+            handleUnauthorized(error);
+        }
+    };
 
     return (
         <ReelFeed
@@ -53,7 +84,7 @@ const Home = () => {
             onSave={saveVideo}
             emptyMessage="No videos available."
         />
-    )
-}
+    );
+};
 
-export default Home
+export default Home;
